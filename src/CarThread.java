@@ -1,34 +1,40 @@
 import java.util.Random;
 
 public class CarThread extends Thread {// potok mawini
-    float distance;
     float speed = 0;
-    float currentDistance = 0;
-    int maxSpeed = 100;
-    float time = 0;
-
-    CarThread(String name, float distance) {
+    int maxSpeed = 300;
+    private boolean isWorking = true;
+    NavThread navigator;
+    CarThread(String name) {
         super(name);
-        this.distance = distance;
     }
 
     public void run() {
         try {
-            if (this.speed < this.maxSpeed && this.currentDistance <= this.distance) {
-                this.speed += 5;
-                this.currentDistance += this.speed;
-                Thread.sleep(1000);
-            }
-            else{
-                this.speed = this.maxSpeed - new Random().nextInt(maxSpeed-2,maxSpeed+2);
-                this.currentDistance += this.speed;
-                if (this.currentDistance >= this.distance) {
-                    throw new Exception();
+            if (isWorking){
+                navigator.speedMassive.add(speed);
+                if (this.speed < this.maxSpeed && navigator.currentDistance <= navigator.distance) {
+                    this.speed += 30;
+                    navigator.currentDistance += speed / 3600;
+                    Thread.sleep(1000);
                 }
-                Thread.sleep(1000);
+                else{
+                    this.speed = this.maxSpeed - new Random().nextInt(maxSpeed-2,maxSpeed+2);
+                    navigator.currentDistance += speed / 3600;
+                    Thread.sleep(1000);
+                }
+                if (navigator.currentDistance >= navigator.distance) {
+                    isWorking = false;
+                }
+                run();
+            }
+        else {
+            isWorking = false;
+            navigator.stopNavigator();
+            interrupt();
             }
         } catch (Exception e) {
-            System.out.println("Приехали");
+
         }
     }
 }
